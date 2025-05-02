@@ -1,10 +1,23 @@
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class Server(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(302)
-        secret_path = 'http://127.0.0.1:5004/secret'
-        self.send_header('Location', secret_path)
-        self.end_headers()
+        if self.path == '/':
+            self.send_response(302)
+            self.send_header('Location', '/secret')
+            self.end_headers()
+        elif self.path == '/secret':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'CE441{you_found_the_secret_flag}')
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Not found')
 
-HTTPServer(('', 80), Server).serve_forever()
+
+PORT = int(os.environ.get('PORT', 8000))
+print(f"Listening on port {PORT}")
+HTTPServer(('', PORT), Server).serve_forever()
